@@ -1,0 +1,9 @@
+.table-base{
+    transition: max-height 500ms;
+}
+.table-expanded{
+    max-height: 200vh;
+}
+.table-hidden{
+    max-height: 0;
+}

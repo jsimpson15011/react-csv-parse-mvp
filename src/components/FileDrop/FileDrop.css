@@ -1,0 +1,21 @@
+.outline{
+    border: dashed darkblue 1px;
+    padding: 32px;
+    cursor: pointer;
+    max-width: 100%;
+    width: 500px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.label{
+    transform: translateY(50%);
+    background: white;
+    padding: 7px;
+}
+.label-container{
+    display: flex;
+    justify-content: center;
+}

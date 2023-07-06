@@ -1,10 +1,10 @@
 import './App.css'
-import {Line, XAxis, CartesianGrid, Tooltip, ComposedChart, Bar} from "recharts";
+import {XAxis, CartesianGrid, Tooltip, ComposedChart, Bar} from "recharts";
 import client from "./data/client.ts";
-import Dropzone from "react-dropzone";
 import React, {useEffect, useState} from "react";
-import DataEditTable from "./components/DataEditTable.tsx";
-import {FormControl, FormLabel, Select} from "@chakra-ui/react";
+import DataEditTable from "./components/DataEditTable/DataEditTable.tsx";
+import {Button, FormControl, FormLabel, Select} from "@chakra-ui/react";
+import FileDrop from "./components/FileDrop/FileDrop.tsx";
 
 type graphData = {
     name: string,
@@ -16,15 +16,6 @@ function App() {
     const [graphData, setGraphData] = useState<graphData[]>([]);
     const [xSelectOptions, setXSelectOptions] = useState<string[]>([]);
     const [xSelectValue, setXSelectValue] = useState("");
-    const data = []
-    for (let i = 0; i < 25; i++) {
-        data.push({
-            name: "test" + i,
-            uv: Math.floor(Math.random() * 20),
-            amt: Math.floor(Math.random() * 100),
-            pv: Math.floor(Math.random() * 100)
-        })
-    }
 
     const handleUpload = async (file: any[]) => {
         const formData = new FormData();
@@ -36,6 +27,13 @@ function App() {
     }
     const handleXSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setXSelectValue(event.target.value);
+    }
+
+    const handleClearData = () => {
+        setUploadedData(null);
+        setXSelectOptions([]);
+        setXSelectValue("");
+        setGraphData([]);
     }
 
     useEffect(() => {
@@ -50,11 +48,11 @@ function App() {
 
     useEffect(() => {
         if (!uploadedData) return;
-        const valueCount = new Map<string,number>();
+        const valueCount = new Map<string, number>();
         const newGraphData: graphData[] = [];
-        uploadedData.forEach((x:any) => {
+        uploadedData.forEach((x: any) => {
             const prev = valueCount.get(x[xSelectValue]);
-            if(prev){
+            if (prev) {
                 valueCount.set(
                     x[xSelectValue],
                     prev + 1
@@ -66,7 +64,7 @@ function App() {
                 )
             }
         });
-        for(const [key,value] of valueCount){
+        for (const [key, value] of valueCount) {
             newGraphData.push({name: key, count: value})
         }
         setGraphData(newGraphData);
@@ -76,19 +74,7 @@ function App() {
 
     return (
         <>
-            <div>
-            </div>
-            <h1>Upload</h1>
-            <Dropzone onDrop={acceptedFiles => handleUpload(acceptedFiles)}>
-                {({getRootProps, getInputProps}) => (
-                    <section>
-                        <div {...getRootProps()}>
-                            <input {...getInputProps()} />
-                            <p>Drag 'n' drop some files here, or click to select files</p>
-                        </div>
-                    </section>
-                )}
-            </Dropzone>
+            <h1>CSV Visualizer</h1>
             <DataEditTable data={uploadedData} updateData={setUploadedData}/>
             <div className="card">
                 {xSelectOptions.length > 0
@@ -104,15 +90,19 @@ function App() {
                     </FormControl>
                     : <></>
                 }
-
-                <ComposedChart width={900} height={400} data={graphData}>
-                    <Line type="monotone" dataKey="count" stroke="#8895d8"/>
-                    <Line type="monotone" dataKey="pv" stroke="#0095d8"/>
-                    <Bar dataKey="count"/>
-                    <CartesianGrid stroke="#ccc"/>
-                    <XAxis dataKey="name"/>
-                    <Tooltip/>
-                </ComposedChart>
+                {
+                    graphData.length === 0 ?
+                        <FileDrop handleUpload={handleUpload}/>
+                        : <>
+                            <ComposedChart width={900} height={400} data={graphData}>
+                                <Bar fill="#A70000" dataKey="count"/>
+                                <CartesianGrid stroke="#ccc"/>
+                                <XAxis dataKey="name"/>
+                                <Tooltip/>
+                            </ComposedChart>
+                            <Button colorScheme="red" onClick={handleClearData}>Clear Data</Button>
+                        </>
+                }
             </div>
         </>
     )
